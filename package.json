@@ -1,5 +1,5 @@
 {
-  "name": "mcp-sap-sql-server",
+  "name": "mcp-sapb1-sql",
   "version": "1.0.0",
   "description": "Servidor MCP para SAP Business One SQL Server - Compatible con Claude Desktop",
   "main": "dist/stdio-server.js",

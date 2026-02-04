@@ -61,7 +61,7 @@ Añade la configuración del MCP:
   "mcpServers": {
     "sap-sql": {
       "command": "npx",
-      "args": ["-y", "mcp-sap-sql-server"],
+      "args": ["-y", "mcp-sapb1-sql"],
       "env": {
         "DB_SERVER": "tu-servidor-sql",
         "DB_NAME": "tu-base-de-datos",
