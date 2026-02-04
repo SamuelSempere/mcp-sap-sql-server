@@ -49,7 +49,6 @@ const transport = new StdioServerTransport();
 
 // Manejar cierre graceful
 const shutdown = async () => {
-  console.error('🛑 Cerrando servidor MCP...');
   await closePool();
   process.exit(0);
 };
@@ -60,14 +59,8 @@ process.on('SIGINT', shutdown);
 // Conectar el servidor al transporte stdio
 async function main() {
   try {
-    console.error('🚀 Iniciando MCP Server para SAP Business One (modo stdio)...');
-    console.error(`💾 Conectando a: ${process.env.DB_SERVER || process.env.SQL_SERVER_HOST}/${process.env.DB_NAME || process.env.SQL_SERVER_DATABASE}`);
-    
     await server.connect(transport);
-    
-    console.error('✅ MCP Server conectado y listo para recibir comandos');
   } catch (error) {
-    console.error('❌ Error fatal al iniciar servidor:', error);
     process.exit(1);
   }
 }

@@ -39,15 +39,10 @@ async function getPool(): Promise<sql.ConnectionPool> {
     poolPromise = new sql.ConnectionPool(sqlConfig)
       .connect()
       .then((p: sql.ConnectionPool) => {
-        console.log('✅ Conectado a SQL Server:', {
-          server: config.sql.host,
-          database: config.sql.database,
-        });
         pool = p;
         return p;
       })
       .catch((err: Error) => {
-        console.error('❌ Error al conectar a SQL Server:', err);
         poolPromise = null;
         throw err;
       });
@@ -170,12 +165,10 @@ export async function closePool(): Promise<void> {
   if (pool) {
     try {
       await pool.close();
-      console.log('✅ Pool de conexiones cerrado');
       pool = null;
       poolPromise = null;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('❌ Error al cerrar el pool:', errorMessage);
+      // Silenciar errores de cierre
     }
   }
 }
