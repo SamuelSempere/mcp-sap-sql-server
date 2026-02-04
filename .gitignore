@@ -1,0 +1,30 @@
+# Archivos de entorno (contienen credenciales)
+.env
+.env.*
+!.env.example
+
+# Dependencias
+node_modules/
+
+# Archivos compilados - INCLUIDOS para que funcione con npx
+# dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Certificados SSL (si se usan)
+cert/
+*.pem
+*.key
+*.crt
