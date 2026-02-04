@@ -187,6 +187,62 @@ declare const toolsListHandler: () => Promise<{
             };
             readonly required: readonly ["objectName"];
         };
+    } | {
+        name: string;
+        description: string;
+        inputSchema: {
+            readonly type: "object";
+            readonly properties: {
+                readonly tableName: {
+                    readonly type: "string";
+                    readonly description: "Nombre de la tabla SAP B1 (ej: OITM, ORDR, OINV)";
+                };
+            };
+            readonly required: readonly ["tableName"];
+        };
+    } | {
+        name: string;
+        description: string;
+        inputSchema: {
+            readonly type: "object";
+            readonly properties: {
+                readonly itemCode: {
+                    readonly type: "string";
+                    readonly description: "Código del artículo";
+                };
+            };
+            readonly required: readonly ["itemCode"];
+        };
+    } | {
+        name: string;
+        description: string;
+        inputSchema: {
+            readonly type: "object";
+            readonly properties: {
+                readonly cardCode: {
+                    readonly type: "string";
+                    readonly description: "Código del socio de negocio";
+                };
+            };
+            readonly required: readonly ["cardCode"];
+        };
+    } | {
+        name: string;
+        description: string;
+        inputSchema: {
+            readonly type: "object";
+            readonly properties: {
+                readonly searchTerm: {
+                    readonly type: "string";
+                    readonly description: "Término de búsqueda (número de documento, código de cliente, etc.)";
+                };
+                readonly docType: {
+                    readonly type: "string";
+                    readonly description: "Tipo de documento: invoice, order, delivery, purchase, purchaseInvoice (opcional)";
+                };
+            };
+            readonly required: readonly ["searchTerm"];
+        };
     })[];
 }>;
 /**

@@ -3,6 +3,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import { executeQuery, executeScalar, executeProcedure } from '../db/sqlClient';
 import { config } from '../config/env';
 import * as sapTools from './sapTools';
+import * as sapB1Tools from './sapB1Tools';
 
 // Límite de filas configurable desde variables de entorno
 // Por defecto 100,000 para permitir consultas complejas como comparativas de ventas
@@ -257,17 +258,178 @@ const listTablesByPrefixTool = {
   } as const,
 };
 
+// ============================================
+// HERRAMIENTAS ESPECÍFICAS SAP BUSINESS ONE
+// ============================================
+
+const getSapTablesDictionaryTool = {
+  name: 'getSapTablesDictionary',
+  description: 'Obtiene el diccionario completo de tablas SAP Business One con descripciones, categorías y relaciones. Útil para entender la estructura de SAP B1.',
+  inputSchema: {
+    type: 'object',
+    properties: {},
+    required: [],
+  } as const,
+};
+
+const getSapTableInfoTool = {
+  name: 'getSapTableInfo',
+  description: 'Obtiene información detallada de una tabla SAP B1 específica, incluyendo descripción, campos con sus significados y relaciones.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      tableName: { type: 'string', description: 'Nombre de la tabla SAP B1 (ej: OITM, ORDR, OINV)' },
+    },
+    required: ['tableName'],
+  } as const,
+};
+
+const getItemStockTool = {
+  name: 'getItemStock',
+  description: 'Obtiene el stock actual de un artículo en SAP B1, incluyendo stock total, comprometido, en pedido y disponible por almacén.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      itemCode: { type: 'string', description: 'Código del artículo' },
+    },
+    required: ['itemCode'],
+  } as const,
+};
+
+const getBusinessPartnerTool = {
+  name: 'getBusinessPartner',
+  description: 'Obtiene información completa de un socio de negocio (cliente o proveedor) en SAP B1.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      cardCode: { type: 'string', description: 'Código del socio de negocio' },
+    },
+    required: ['cardCode'],
+  } as const,
+};
+
+const getSalesHistoryTool = {
+  name: 'getSalesHistory',
+  description: 'Obtiene el historial de ventas de un artículo en SAP B1, agrupado por mes.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      itemCode: { type: 'string', description: 'Código del artículo' },
+      year: { type: 'number', description: 'Año a consultar (por defecto el año actual)' },
+    },
+    required: ['itemCode'],
+  } as const,
+};
+
+const getOpenSalesOrdersTool = {
+  name: 'getOpenSalesOrders',
+  description: 'Obtiene los pedidos de venta abiertos/pendientes en SAP B1.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      cardCode: { type: 'string', description: 'Filtrar por código de cliente (opcional)' },
+    },
+    required: [],
+  } as const,
+};
+
+const getOpenInvoicesTool = {
+  name: 'getOpenInvoices',
+  description: 'Obtiene las facturas de cliente pendientes de cobro en SAP B1.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      cardCode: { type: 'string', description: 'Filtrar por código de cliente (opcional)' },
+    },
+    required: [],
+  } as const,
+};
+
+const getPartnerBalanceTool = {
+  name: 'getPartnerBalance',
+  description: 'Obtiene el saldo y documentos abiertos de un cliente o proveedor en SAP B1.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      cardCode: { type: 'string', description: 'Código del socio de negocio' },
+    },
+    required: ['cardCode'],
+  } as const,
+};
+
+const getTopSellingItemsTool = {
+  name: 'getTopSellingItems',
+  description: 'Obtiene los artículos más vendidos en SAP B1.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      top: { type: 'number', description: 'Número de artículos a mostrar (por defecto 10)' },
+      year: { type: 'number', description: 'Año a consultar (por defecto el año actual)' },
+    },
+    required: [],
+  } as const,
+};
+
+const getTopCustomersTool = {
+  name: 'getTopCustomers',
+  description: 'Obtiene los mejores clientes por facturación en SAP B1.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      top: { type: 'number', description: 'Número de clientes a mostrar (por defecto 10)' },
+      year: { type: 'number', description: 'Año a consultar (por defecto el año actual)' },
+    },
+    required: [],
+  } as const,
+};
+
+const getLowStockItemsTool = {
+  name: 'getLowStockItems',
+  description: 'Obtiene los artículos con stock por debajo del mínimo definido en SAP B1.',
+  inputSchema: {
+    type: 'object',
+    properties: {},
+    required: [],
+  } as const,
+};
+
+const getSalesSummaryTool = {
+  name: 'getSalesSummary',
+  description: 'Obtiene un resumen de ventas con totales y comparativa con el período anterior.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      year: { type: 'number', description: 'Año a consultar (por defecto el año actual)' },
+      month: { type: 'number', description: 'Mes a consultar (opcional, 1-12)' },
+    },
+    required: [],
+  } as const,
+};
+
+const searchDocumentTool = {
+  name: 'searchDocument',
+  description: 'Busca documentos en SAP B1 por número, cliente o referencia.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      searchTerm: { type: 'string', description: 'Término de búsqueda (número de documento, código de cliente, etc.)' },
+      docType: { type: 'string', description: 'Tipo de documento: invoice, order, delivery, purchase, purchaseInvoice (opcional)' },
+    },
+    required: ['searchTerm'],
+  } as const,
+};
+
 // Almacenar referencias a los handlers para acceso directo desde HTTP
 const toolsListHandler = async () => {
   return {
     tools: [
-      // Herramientas básicas
+      // Herramientas básicas SQL
       listTablesTool,
       getTableSchemaTool,
       runSqlQueryTool,
       listDatabasesTool,
       describeDatabaseTool,
-      // Herramientas SAP-optimizadas
+      // Herramientas de análisis
       analyzeTableTool,
       analyzeStoredProcedureTool,
       previewDataTool,
@@ -278,6 +440,20 @@ const toolsListHandler = async () => {
       getObjectDependenciesTool,
       getSampleValuesTool,
       listTablesByPrefixTool,
+      // Herramientas específicas SAP Business One
+      getSapTablesDictionaryTool,
+      getSapTableInfoTool,
+      getItemStockTool,
+      getBusinessPartnerTool,
+      getSalesHistoryTool,
+      getOpenSalesOrdersTool,
+      getOpenInvoicesTool,
+      getPartnerBalanceTool,
+      getTopSellingItemsTool,
+      getTopCustomersTool,
+      getLowStockItemsTool,
+      getSalesSummaryTool,
+      searchDocumentTool,
     ],
   };
 };
@@ -650,6 +826,130 @@ export function registerSqlTools(server: Server): void {
 
         case 'listTablesByPrefix': {
           const result = await sapTools.listTablesGroupedByPrefix();
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        // ============================================
+        // HERRAMIENTAS ESPECÍFICAS SAP BUSINESS ONE
+        // ============================================
+
+        case 'getSapTablesDictionary': {
+          const result = await sapB1Tools.getSapTablesDictionary();
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getSapTableInfo': {
+          const { tableName } = args as { tableName: string };
+          if (!tableName || typeof tableName !== 'string') {
+            throw new Error('tableName es requerido y debe ser un string');
+          }
+          const result = await sapB1Tools.getSapTableInfo(tableName);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getItemStock': {
+          const { itemCode } = args as { itemCode: string };
+          if (!itemCode || typeof itemCode !== 'string') {
+            throw new Error('itemCode es requerido y debe ser un string');
+          }
+          const result = await sapB1Tools.getItemStock(itemCode);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getBusinessPartner': {
+          const { cardCode } = args as { cardCode: string };
+          if (!cardCode || typeof cardCode !== 'string') {
+            throw new Error('cardCode es requerido y debe ser un string');
+          }
+          const result = await sapB1Tools.getBusinessPartner(cardCode);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getSalesHistory': {
+          const { itemCode, year } = args as { itemCode: string; year?: number };
+          if (!itemCode || typeof itemCode !== 'string') {
+            throw new Error('itemCode es requerido y debe ser un string');
+          }
+          const result = await sapB1Tools.getSalesHistory(itemCode, year);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getOpenSalesOrders': {
+          const { cardCode } = args as { cardCode?: string };
+          const result = await sapB1Tools.getOpenSalesOrders(cardCode);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getOpenInvoices': {
+          const { cardCode } = args as { cardCode?: string };
+          const result = await sapB1Tools.getOpenInvoices(cardCode);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getPartnerBalance': {
+          const { cardCode } = args as { cardCode: string };
+          if (!cardCode || typeof cardCode !== 'string') {
+            throw new Error('cardCode es requerido y debe ser un string');
+          }
+          const result = await sapB1Tools.getPartnerBalance(cardCode);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getTopSellingItems': {
+          const { top, year } = args as { top?: number; year?: number };
+          const result = await sapB1Tools.getTopSellingItems(top || 10, year);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getTopCustomers': {
+          const { top, year } = args as { top?: number; year?: number };
+          const result = await sapB1Tools.getTopCustomers(top || 10, year);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getLowStockItems': {
+          const result = await sapB1Tools.getLowStockItems();
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'getSalesSummary': {
+          const { year, month } = args as { year?: number; month?: number };
+          const result = await sapB1Tools.getSalesSummary(year, month);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+          };
+        }
+
+        case 'searchDocument': {
+          const { searchTerm, docType } = args as { searchTerm: string; docType?: string };
+          if (!searchTerm || typeof searchTerm !== 'string') {
+            throw new Error('searchTerm es requerido y debe ser un string');
+          }
+          const result = await sapB1Tools.searchDocument(searchTerm, docType);
           return {
             content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
           };
